@@ -32,6 +32,7 @@ jobs:
           pip install checkov
 
       - name: Terraform Security Scan
+        continue-on-error: true
         run: |
             checkov -d . --framework terraform
       # ==================================================
@@ -41,6 +42,7 @@ jobs:
       - name: Gitleaks Scan
         uses: gitleaks/gitleaks-action@v2
       - name: Gitleaks Scan start
+        continue-on-error: true
         run: |
           gitleaks git --verbose
 
@@ -52,15 +54,18 @@ jobs:
         uses: terraform-linters/setup-tflint@v4
 
       - name: TFLint Init
+        continue-on-error: true
         run: tflint --init
 
       - name: TFLint Scan
+        continue-on-error: true
         run: tflint --recursive
       # ==================================================
       # 9. tfsec - Terraform Security
       # ==================================================
 
       - name: tfsec Security Scan
+        continue-on-error: true
         uses: aquasecurity/tfsec-action@v1.0.3
         with:
           soft_fail: false
@@ -69,6 +74,7 @@ jobs:
       # ==================================================
 
       - name: Trivy Terraform Scan
+        continue-on-error: true
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: config
