@@ -21,6 +21,8 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
 
       - name: Terraform Validate
         run: terraform validate
@@ -31,7 +33,48 @@ jobs:
 
       - name: Terraform Security Scan
         run: |
-          checkov -d . --framework terraform
+            checkov -d . --framework terraform --exit-code 1
+      # ==================================================
+      # 7. Gitleaks - Secret Detection
+      # ==================================================
+
+      - name: Gitleaks Scan
+        uses: gitleaks/gitleaks-action@v2
+        run: |
+          gitleaks detect --source . --exit-code 1
+
+      # ==================================================
+      # 8. TFLint - Terraform Linting
+      # ==================================================
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+
+      - name: TFLint Init
+        run: tflint --init
+
+      - name: TFLint Scan
+        run: tflint --recursive
+      # ==================================================
+      # 9. tfsec - Terraform Security
+      # ==================================================
+
+      - name: tfsec Security Scan
+        uses: aquasecurity/tfsec-action@v1.0.3
+        with:
+          soft_fail: false
+        # ==================================================
+      # 10. Trivy - Infrastructure Security Scan
+      # ==================================================
+
+      - name: Trivy Terraform Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: config
+          scan-ref: .
+          severity: CRITICAL,HIGH
+          exit-code: 1
+
 
       - name: Terraform Plan
         run: terraform plan
